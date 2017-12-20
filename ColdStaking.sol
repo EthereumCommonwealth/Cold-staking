@@ -16,7 +16,9 @@ contract cold_staking {
         uint256 public staking_pool;
         
         uint256 public staking_threshold = 1000 ether;
-        uint256 public claim_interval    = 175000; // blocks
+        //uint256 public claim_delay    = 175000; // 1 month in blocks
+        
+        uint256 public claim_delay    = 0;
         
         mapping (address => Staker) staker;
         
@@ -44,7 +46,7 @@ contract cold_staking {
         
         function claim() only_staker
         {
-            require(block.number >= staker[msg.sender].last_claim_block.add(claim_interval));
+            require(block.number >= staker[msg.sender].last_claim_block.add(claim_delay));
             msg.sender.transfer(reward(msg.sender));
             staker[msg.sender].last_claim_block = block.number;
         }
