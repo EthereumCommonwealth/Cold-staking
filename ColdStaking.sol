@@ -49,7 +49,7 @@ contract cold_staking {
         
         function reward(address _addr) constant returns (uint256 _reward)
         {
-            return (staker[_addr].weight / staking_pool * (block.number.sub(staker[_addr].last_claim_block)) * reward_pool());
+            return (staker[_addr].weight / staking_pool * reward_pool());
         }
         
         function reward_pool() constant returns (uint256)
