@@ -14,9 +14,6 @@ contract cold_staking {
         }
         
         uint256 public staking_pool;
-        uint256 public reward_pool;
-        
-        uint256 public reward_per_block = 400000000000000000;
         
         uint256 public staking_threshold = 1000 ether;
         
@@ -24,8 +21,9 @@ contract cold_staking {
         
         function() payable
         {
-            require(msg.value > 0);
-            reward_pool.add(msg.value);
+            // No donations accepted! Consider any value deposit
+            // is an attempt to become staker.
+            become_staker();
         }
         
         function become_staker() payable
@@ -33,7 +31,7 @@ contract cold_staking {
             assert(msg.value >= staking_threshold);
             staking_pool.add(msg.value);
             staker[msg.sender].weight.add(msg.value);
-            staker[msg.sender].init_block = block.number.add(172800);
+            staker[msg.sender].init_block = block.number.add(175000);
             staker[msg.sender].last_claim_block = block.number;
         }
         
@@ -46,13 +44,17 @@ contract cold_staking {
         function claim() only_staker
         {
             msg.sender.transfer(reward(msg.sender));
-            reward_pool = this.balance.sub(staking_pool);
             staker[msg.sender].last_claim_block = block.number;
         }
         
         function reward(address _addr) constant returns (uint256 _reward)
         {
-            return (staker[_addr].weight / staking_pool * (block.number.sub(staker[_addr].last_claim_block)) * reward_per_block);
+            return (staker[_addr].weight / staking_pool * (block.number.sub(staker[_addr].last_claim_block)) * reward_pool());
+        }
+        
+        function reward_pool() constant returns (uint256)
+        {
+            return this.balance.sub(staking_pool);
         }
         
         modifier only_staker
