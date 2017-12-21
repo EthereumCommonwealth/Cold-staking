@@ -55,7 +55,7 @@ contract cold_staking {
         
         function reward(address _addr) constant returns (uint256 _reward)
         {
-            _reward = staker[_addr].weight.mul((block.number.sub(staker[_addr].last_claim_block) / claim_delay) / (reward_pool().add( staker[_addr].weight.mul( block.number.sub(staker[_addr].last_claim_block) / claim_delay ) )) );
+            return (staker[_addr].weight / staking_pool * reward_pool());
         }
         
         function report_abuse(address _addr) only_staker
