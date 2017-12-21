@@ -19,6 +19,7 @@ contract cold_staking {
         //uint256 public claim_delay    = 175000; // 1 month in blocks
         
         uint256 public claim_delay    = 0;
+        uint256 public max_delay      = 1750000;
         
         mapping (address => Staker) staker;
         
@@ -38,8 +39,9 @@ contract cold_staking {
             staker[msg.sender].last_claim_block = block.number;
         }
         
-        function withdraw_stake() only_staker
+        function withdraw_stake() only_staker mutex(msg.sender)
         {
+            msg.sender.transfer(staker[msg.sender].weight);
             staking_pool.sub(staker[msg.sender].weight);
             staker[msg.sender].weight.sub(staker[msg.sender].weight);
         }
@@ -53,8 +55,24 @@ contract cold_staking {
         
         function reward(address _addr) constant returns (uint256 _reward)
         {
-            return (staker[_addr].weight / staking_pool * reward_pool());
+            _reward = staker[_addr].weight.mul((block.number.sub(staker[_addr].last_claim_block) / claim_delay) / (reward_pool().add( staker[_addr].weight.mul( block.number.sub(staker[_addr].last_claim_block) / claim_delay ) )) );
         }
+        
+        function report_abuse(address _addr) only_staker
+        {
+            assert(staker[_addr].weight > 0);
+            assert(block.number > staker[_addr].last_claim_block.add(max_delay));
+            
+            _addr.transfer(staker[msg.sender].weight);
+            staker[_addr].weight = 0;
+        }
+        
+        
+        /*
+        function delay_round(address _addr) private constant returns (uint256 _rounds)
+        {
+            
+        }*/
         
         function reward_pool() constant returns (uint256)
         {
@@ -67,4 +85,17 @@ contract cold_staking {
             _;
         }
         
+    
+        mapping (address => bool) private muted;
+        modifier mutex(address _target)
+        {
+            if( muted[_target] )
+            {
+                revert();
+            }
+        
+            muted[_target] = true;
+            _;
+            muted[_target] = false;
+        }
 }
