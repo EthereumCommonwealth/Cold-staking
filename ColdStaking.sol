@@ -10,16 +10,14 @@ contract cold_staking {
         {
             uint256 weight;
             uint256 init_block;
-            //uint256 last_claim_block;
         }
         
         uint256 public staking_pool;
         
         uint256 public staking_threshold = 0 ether;
-        //uint256 public claim_delay    = 175000; // 1 month in blocks
         
-        uint256 public round_interval    = 172800; // approx. 1 month in blocks
-        uint256 public max_delay      = 2073600; // approx. 1 year in blocks
+        uint256 public round_interval    = 200; // approx. 1 month in blocks
+        uint256 public max_delay      = 7 * 6000; // approx. 1 year in blocks
         
         mapping (address => Staker) staker;
         
@@ -82,7 +80,6 @@ contract cold_staking {
             assert(staker[msg.sender].weight > 0);
             _;
         }
-        
     
         mapping (address => bool) private muted;
         modifier mutex(address _target)
@@ -95,5 +92,18 @@ contract cold_staking {
             muted[_target] = true;
             _;
             muted[_target] = false;
+        }
+        
+        ////////////// DEBUGGING /////////////////////////////////////////////////////////////
+        
+        
+        function test() constant returns (string)
+        {
+            return "success!";
+        }
+        
+        function staker_info(address _addr) constant returns (uint256 weight, uint256 init, uint256 stake_time, uint256 reward)
+        {
+            return (staker[_addr].weight, staker[_addr].init_block, block.number - staker[_addr].init_block, stake_reward(_addr));
         }
 }
