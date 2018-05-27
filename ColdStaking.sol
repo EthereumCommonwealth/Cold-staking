@@ -10,16 +10,16 @@ contract cold_staking {
         {
             uint256 weight;
             uint256 init_block;
-            uint256 last_claim_block;
+            //uint256 last_claim_block;
         }
         
         uint256 public staking_pool;
         
-        uint256 public staking_threshold = 1000 ether;
+        uint256 public staking_threshold = 0 ether;
         //uint256 public claim_delay    = 175000; // 1 month in blocks
         
-        uint256 public claim_delay    = 0;
-        uint256 public max_delay      = 1750000;
+        uint256 public round_interval    = 172800; // approx. 1 month in blocks
+        uint256 public max_delay      = 2073600; // approx. 1 year in blocks
         
         mapping (address => Staker) staker;
         
@@ -27,16 +27,15 @@ contract cold_staking {
         {
             // No donations accepted! Consider any value deposit
             // is an attempt to become staker.
-            become_staker();
+            start_staking();
         }
         
-        function become_staker() payable
+        function start_staking() payable
         {
             assert(msg.value >= staking_threshold);
             staking_pool.add(msg.value);
             staker[msg.sender].weight.add(msg.value);
             staker[msg.sender].init_block = block.number;
-            staker[msg.sender].last_claim_block = block.number;
         }
         
         function withdraw_stake() only_staker mutex(msg.sender)
@@ -48,20 +47,20 @@ contract cold_staking {
         
         function claim() only_staker
         {
-            require(block.number >= staker[msg.sender].last_claim_block.add(claim_delay));
-            msg.sender.transfer(reward(msg.sender));
-            staker[msg.sender].last_claim_block = block.number;
+            require(block.number >= staker[msg.sender].init_block.add(round_interval));
+            msg.sender.transfer(stake_reward(msg.sender));
+            staker[msg.sender].init_block = block.number;
         }
         
-        function reward(address _addr) constant returns (uint256 _reward)
+        function stake_reward(address _addr) constant returns (uint256 _reward)
         {
-            return (staker[_addr].weight / staking_pool * reward_pool());
+            return (reward() * staker[_addr].weight * ((block.number - staker[_addr].init_block) / round_interval) / (staking_pool + ((block.number - staker[_addr].init_block) / round_interval) * staker[_addr].weight));
         }
         
         function report_abuse(address _addr) only_staker
         {
             assert(staker[_addr].weight > 0);
-            assert(block.number > staker[_addr].last_claim_block.add(max_delay));
+            assert(block.number > staker[_addr].init_block.add(max_delay));
             
             _addr.transfer(staker[msg.sender].weight);
             staker[_addr].weight = 0;
@@ -74,7 +73,7 @@ contract cold_staking {
             
         }*/
         
-        function reward_pool() constant returns (uint256)
+        function reward() constant returns (uint256)
         {
             return this.balance.sub(staking_pool);
         }
