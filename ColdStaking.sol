@@ -38,6 +38,12 @@ contract cold_staking {
             staker[msg.sender].init_block = block.number;
         }
         
+        function claim_and_withdraw()
+        {
+            claim();
+            withdraw_stake();
+        }
+        
         function withdraw_stake() only_staker mutex(msg.sender)
         {
             msg.sender.transfer(staker[msg.sender].weight);
@@ -45,7 +51,7 @@ contract cold_staking {
             staker[msg.sender].weight.sub(staker[msg.sender].weight);
         }
         
-        function claim() only_staker
+        function claim() only_staker mutex(msg.sender)
         {
             require(block.number >= staker[msg.sender].init_block.add(round_interval));
             msg.sender.transfer(stake_reward(msg.sender));
@@ -65,13 +71,6 @@ contract cold_staking {
             _addr.transfer(staker[msg.sender].weight);
             staker[_addr].weight = 0;
         }
-        
-        
-        /*
-        function delay_round(address _addr) private constant returns (uint256 _rounds)
-        {
-            
-        }*/
         
         function reward() constant returns (uint256)
         {
