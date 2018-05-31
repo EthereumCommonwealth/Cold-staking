@@ -16,6 +16,11 @@ contract cold_staking {
         
         uint256 public staking_threshold = 0 ether;
         
+        //uint256 public round_interval    = 172800; // approx. 1 month in blocks
+        //uint256 public max_delay      = 172800 * 12; // approx. 1 year in blocks
+        
+        
+        /// TESTING VALUES
         uint256 public round_interval    = 200; // approx. 1 month in blocks
         uint256 public max_delay      = 7 * 6000; // approx. 1 year in blocks
         
