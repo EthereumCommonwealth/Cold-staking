@@ -41,6 +41,8 @@ contract cold_staking {
             staker[msg.sender].init_block = block.number;
         }
         
+        function First_Stake_donation() payable { }
+        
         function claim_and_withdraw()
         {
             claim();
@@ -63,6 +65,7 @@ contract cold_staking {
         
         function stake_reward(address _addr) constant returns (uint256 _reward)
         {
+        // TODO: reassign the formula
             return (reward() * staker[_addr].weight * ((block.number - staker[_addr].init_block) / round_interval) / (staking_pool + ((block.number - staker[_addr].init_block) / round_interval) * staker[_addr].weight));
         }
         
