@@ -65,8 +65,7 @@ contract cold_staking {
         
         function stake_reward(address _addr) constant returns (uint256 _reward)
         {
-        // TODO: reassign the formula
-            return (reward() * staker[_addr].weight * ((block.number - staker[_addr].init_block) / round_interval) / (staking_pool + ((block.number - staker[_addr].init_block) / round_interval) * staker[_addr].weight));
+            return ( reward() * (( block.number - staker[msg.sender].init_block ) / round_interval ) * (staker[msg.sender].weight / ( staking_pool + ( staker[msg.sender].weight * ( block.number - staker[msg.sender].init_block ) / round_interval ) )) );
         }
         
         function report_abuse(address _addr) only_staker
