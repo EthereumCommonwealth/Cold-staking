@@ -31,7 +31,7 @@ contract('ColdStaking', function (accounts) {
     });
 
 
-    const _staking_threshold = new BigNumber(ether(0));
+    const _staking_threshold = 0;
 
     const _max_delay = new BigNumber(42000);
 
@@ -45,7 +45,7 @@ contract('ColdStaking', function (accounts) {
 
         const staking_pool = await _ColdStaking.staking_pool();
 
-        staking_pool.should.be.bignumber.equal(new BigNumber(ether(0)));
+        staking_pool.should.be.bignumber.equal(0);
 
         const reward = await _ColdStaking.reward();
 
@@ -64,20 +64,20 @@ contract('ColdStaking', function (accounts) {
 
     it('should accept donation, increase balance and reward', async function () {
 
-
         const donation = await _ColdStaking.First_Stake_donation({value: ether(1)});
 
         const staking_pool = await _ColdStaking.staking_pool();
 
         const reward_ = await _ColdStaking.reward();
 
+        donation.logs[0].event.should.be.equal('FirstStakeDonation');
+
         reward_.should.be.bignumber.equal(ether(1));
 
-        staking_pool.should.be.bignumber.equal(ether(0))
+        staking_pool.should.be.bignumber.equal(0)
     });
 
     it('should start_staking', async function () {
-
 
         const _value = ether(1);
 
@@ -104,7 +104,7 @@ contract('ColdStaking', function (accounts) {
 
     });
 
-    it('fallback tx defaults to start_staking', async function () {
+    it('sendTransaction to contract will start_staking', async function () {
 
 
         const _value = ether(1);
