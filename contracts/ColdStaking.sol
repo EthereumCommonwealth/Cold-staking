@@ -7,11 +7,8 @@ contract ColdStaking {
     using SafeMath for uint256;
 
     event StartStaking(address addr, uint256 value, uint256 weight, uint256 init_block);
-
     event WithdrawStake(address staker, uint256 weight);
-
     event Claim(address staker, uint256 reward);
-
     event FirstStakeDonation(address _address, uint256 value);
 
 
@@ -51,7 +48,7 @@ contract ColdStaking {
         staker[msg.sender].weight = staker[msg.sender].weight.add(msg.value);
         staker[msg.sender].init_block = block.number;
 
-        StartStaking(
+        emit StartStaking(
             msg.sender,
             msg.value,
             staker[msg.sender].weight,
@@ -64,7 +61,7 @@ contract ColdStaking {
 
     function First_Stake_donation() public payable {
 
-        FirstStakeDonation(msg.sender, msg.value);
+        emit FirstStakeDonation(msg.sender, msg.value);
 
     }
 
@@ -80,7 +77,7 @@ contract ColdStaking {
         msg.sender.transfer(staker[msg.sender].weight);
         staking_pool = staking_pool.sub(staker[msg.sender].weight);
         staker[msg.sender].weight = staker[msg.sender].weight.sub(staker[msg.sender].weight);
-        WithdrawStake(msg.sender, staker[msg.sender].weight);
+        emit WithdrawStake(msg.sender, staker[msg.sender].weight);
 
     }
 
@@ -92,7 +89,7 @@ contract ColdStaking {
         msg.sender.transfer(_reward);
         staker[msg.sender].init_block = block.number;
 
-        Claim(msg.sender, _reward);
+        emit Claim(msg.sender, _reward);
     }
 
     function stake_reward(address _addr) public view returns (uint256 _reward)
