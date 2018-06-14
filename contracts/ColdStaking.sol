@@ -48,17 +48,14 @@ contract ColdStaking {
     {
         assert(msg.value >= staking_threshold);
         staking_pool = staking_pool.add(msg.value);
-
-        Staker storage _staker = staker[msg.sender];
-
-        _staker.weight = _staker.weight.add(msg.value);
-        _staker.init_block = block.number;
+        staker[msg.sender].weight = staker[msg.sender].weight.add(msg.value);
+        staker[msg.sender].init_block = block.number;
 
         StartStaking(
             msg.sender,
             msg.value,
-            _staker.weight,
-            _staker.init_block
+            staker[msg.sender].weight,
+            staker[msg.sender].init_block
         );
 
 
@@ -68,7 +65,6 @@ contract ColdStaking {
     function First_Stake_donation() public payable {
 
         FirstStakeDonation(msg.sender, msg.value);
-
 
     }
 
