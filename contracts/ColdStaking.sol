@@ -76,14 +76,11 @@ contract ColdStaking {
 
     function withdraw_stake() public only_staker mutex(msg.sender)
     {
-
-        Staker storage _staker = staker[msg.sender];
-        uint256 _weight = _staker.weight;
-        msg.sender.transfer(_weight);
-        staking_pool = staking_pool.sub(_weight);
-        _staker.weight = 0;
-        WithdrawStake(msg.sender, _weight);
-
+        
+        msg.sender.transfer(staker[msg.sender].weight);
+        staking_pool = staking_pool.sub(staker[msg.sender].weight);
+        staker[msg.sender].weight = staker[msg.sender].weight.sub(staker[msg.sender].weight);
+        WithdrawStake(msg.sender, staker[msg.sender].weight);
 
     }
 
