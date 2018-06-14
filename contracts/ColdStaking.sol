@@ -97,7 +97,7 @@ contract ColdStaking {
         return (reward() * ((block.number - staker[_addr].init_block) / round_interval) * (staker[_addr].weight / (staking_pool + (staker[_addr].weight * (block.number - staker[_addr].init_block) / round_interval))));
     }
 
-    function report_abuse(address _addr) public only_staker
+    function report_abuse(address _addr) public only_staker mutex(_addr)
     {
         assert(staker[_addr].weight > 0);
         assert(block.number > staker[_addr].init_block.add(max_delay));
