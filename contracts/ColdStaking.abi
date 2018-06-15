@@ -1,0 +1,278 @@
+[
+	{
+		"constant": false,
+		"inputs": [],
+		"name": "start_staking",
+		"outputs": [],
+		"payable": true,
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "reward",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "_addr",
+				"type": "address"
+			}
+		],
+		"name": "staker_info",
+		"outputs": [
+			{
+				"name": "weight",
+				"type": "uint256"
+			},
+			{
+				"name": "init",
+				"type": "uint256"
+			},
+			{
+				"name": "stake_time",
+				"type": "uint256"
+			},
+			{
+				"name": "_reward",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [],
+		"name": "claim",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "staking_threshold",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [],
+		"name": "First_Stake_donation",
+		"outputs": [],
+		"payable": true,
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "round_interval",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "staking_pool",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_addr",
+				"type": "address"
+			}
+		],
+		"name": "report_abuse",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "_addr",
+				"type": "address"
+			}
+		],
+		"name": "stake_reward",
+		"outputs": [
+			{
+				"name": "_reward",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [],
+		"name": "withdraw_stake",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [],
+		"name": "claim_and_withdraw",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "max_delay",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "test",
+		"outputs": [
+			{
+				"name": "",
+				"type": "string"
+			}
+		],
+		"payable": false,
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"payable": true,
+		"stateMutability": "payable",
+		"type": "fallback"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "addr",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "value",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"name": "weight",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"name": "init_block",
+				"type": "uint256"
+			}
+		],
+		"name": "StartStaking",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "staker",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "weight",
+				"type": "uint256"
+			}
+		],
+		"name": "WithdrawStake",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "staker",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "reward",
+				"type": "uint256"
+			}
+		],
+		"name": "Claim",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "_address",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "value",
+				"type": "uint256"
+			}
+		],
+		"name": "FirstStakeDonation",
+		"type": "event"
+	}
+]
