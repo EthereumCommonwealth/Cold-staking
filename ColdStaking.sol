@@ -92,16 +92,16 @@ contract ColdStaking {
         emit Claim(msg.sender, _reward);
     }
 
-    function stake_reward(address _addr) public view returns (uint256 _reward)
+    function stake_reward(address _addr) public constant returns (uint256 _reward)
     {
         return (reward() * stakerTimeStake(_addr) * stakerWeightStake(_addr));
     }
-    function stakerTimeStake(address _addr) public view returns (uint256 _time)
+    function stakerTimeStake(address _addr) public constant returns (uint256 _time)
     {
         //return ((block.number - staker[_addr].init_block) / round_interval);
         return 1;
     }
-    function stakerWeightStake(address _addr) public view returns (uint256 _stake)
+    function stakerWeightStake(address _addr) public constant returns (uint256 _stake)
     {
         //return (staker[_addr].weight / (staking_pool + staker[_addr].weight * (stakerTimeStake(_addr) - 1)));
         return 0;
@@ -147,9 +147,18 @@ contract ColdStaking {
         return "success!";
     }
 
-    function staker_info(address _addr) public view returns
+    function staker_info(address _addr) public constant returns
     (uint256 weight, uint256 init, uint256 stake_time, uint256 _reward)
     {
+        if (staker[_addr].init_block == 0)
+        {
+            return (
+            staker[_addr].weight,
+            staker[_addr].init_block,
+            0,
+            stake_reward(_addr)
+        );
+        }
         return (
         staker[_addr].weight,
         staker[_addr].init_block,
