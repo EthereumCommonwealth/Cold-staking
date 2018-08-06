@@ -6,4 +6,4 @@ https://docs.google.com/document/d/1LpRHzW7gGV1JfiXUQOmW-UEVF9TCNNWrYiItDuLgiGA/
 
 The protocol is currently in proof of concept phase.
 
-Rinkeby address 0xa3a278371d1569d849f93f4241c7812969e863a3 .
+CLO Testnet 3.0  address: 0x99e318aa116bba18db83cfcfc9d071d8ddb6fa17
