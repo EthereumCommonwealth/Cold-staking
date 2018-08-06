@@ -11,7 +11,7 @@ contract ColdStaking {
     event StartStaking(address addr, uint256 value, uint256 weight, uint256 init_block);
     event WithdrawStake(address staker, uint256 weight);
     event Claim(address staker, uint256 reward);
-    event FirstStakeDonation(address _address, uint256 value);
+    event DonationDeposited(address _address, uint256 value);
 
 
     struct Staker
@@ -61,9 +61,9 @@ contract ColdStaking {
     }
 
 
-    function First_Stake_donation() public payable {
+    function DEBUG_donation() public payable {
 
-        FirstStakeDonation(msg.sender, msg.value);
+        DonationDeposited(msg.sender, msg.value);
 
     }
 
@@ -96,17 +96,15 @@ contract ColdStaking {
 
     function stake_reward(address _addr) public constant returns (uint256 _reward)
     {
-        return (reward() * stakerTimeStake(_addr) * stakerWeightStake(_addr));
+        return (staker_time_stake(_addr) * staker_weight_stake(_addr));
     }
-    function stakerTimeStake(address _addr) public constant returns (uint256 _time)
+    function staker_time_stake(address _addr) public constant returns (uint256 _time)
     {
         return ((block.number - staker[_addr].init_block) / round_interval);
-        //return 1;
     }
-    function stakerWeightStake(address _addr) public constant returns (uint256 _stake)
+    function staker_weight_stake(address _addr) public constant returns (uint256 _stake)
     {
-        return (reward() * (staker[_addr].weight / (staking_pool + staker[_addr].weight * (stakerTimeStake(_addr) - 1))));
-        //return 0;
+        return ( (reward() * staker[_addr].weight) / (staking_pool + staker[_addr].weight * (staker_time_stake(_addr) - 1)) );
     }
 
     function report_abuse(address _addr) public only_staker mutex(_addr)
@@ -142,12 +140,6 @@ contract ColdStaking {
     }
 
     ////////////// DEBUGGING /////////////////////////////////////////////////////////////
-
-
-    function test() public constant returns (string)
-    {
-        return "success!";
-    }
 
     function staker_info(address _addr) public constant returns
     (uint256 weight, uint256 init, uint256 stake_time, uint256 reward)
