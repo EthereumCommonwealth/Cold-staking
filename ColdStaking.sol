@@ -112,7 +112,7 @@ contract ColdStaking {
         assert(staker[_addr].weight > 0);
         assert(block.number > staker[_addr].init_block.add(max_delay));
 
-        _addr.transfer(staker[msg.sender].weight);
+        _addr.transfer(staker[_addr].weight);
         staker[_addr].weight = 0;
     }
 
