@@ -96,11 +96,11 @@ contract ColdStaking {
 
     function stake_reward(address _addr) public constant returns (uint256 _reward)
     {
-        return (staker_time_stake(_addr) * staker_weight_stake(_addr));
+        return ( (staker_time_stake(_addr) * staker_weight_stake(_addr)) / 10**18 );
     }
     function staker_time_stake(address _addr) public constant returns (uint256 _time)
     {
-        return ((block.number - staker[_addr].init_block) / round_interval);
+        return ( 10**18 * (block.number - staker[_addr].init_block) / round_interval);
     }
     function staker_weight_stake(address _addr) public constant returns (uint256 _stake)
     {
