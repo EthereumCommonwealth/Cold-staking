@@ -29,8 +29,8 @@ contract ColdStaking {
 
 
     /// TESTING VALUES
-    uint256 public round_interval = 15; // approx. 1 month in blocks
-    uint256 public max_delay = 7 * 6000; // approx. 1 year in blocks
+    uint256 public round_interval = 24*60*4; // approx. 1 day in blocks
+    uint256 public max_delay = 12 * 24*60*4; // approx. 12 days in blocks
 
     mapping(address => Staker) staker;
 
@@ -49,6 +49,7 @@ contract ColdStaking {
         staker[msg.sender].weight = staker[msg.sender].weight.add(msg.value);
         staker[msg.sender].init_block = block.number;
 
+
         emit StartStaking(
             msg.sender,
             msg.value,
@@ -61,9 +62,7 @@ contract ColdStaking {
 
 
     function DEBUG_donation() public payable {
-
         emit DonationDeposited(msg.sender, msg.value);
-
     }
 
     function claim_and_withdraw() public
@@ -71,6 +70,7 @@ contract ColdStaking {
         claim();
         withdraw_stake();
     }
+
 
     function withdraw_stake() public only_staker
     {
@@ -84,11 +84,11 @@ contract ColdStaking {
     function claim() public only_staker
     {
         require(block.number >= staker[msg.sender].init_block.add(round_interval));
-
+        
         uint256 _reward = stake_reward(msg.sender);
         staker[msg.sender].init_block = block.number;
         msg.sender.transfer(_reward);
-
+        
         emit Claim(msg.sender, _reward);
     }
 
@@ -129,10 +129,12 @@ contract ColdStaking {
     ////////////// DEBUGGING /////////////////////////////////////////////////////////////
 
     function staker_info(address _addr) public constant returns
+
     (uint256 weight, uint256 init, uint256 _stake_time, uint256 _reward)
     {
         _stake_time = 0;
         _reward = 0;
+        
         if (staker[_addr].init_block > 0)
         {
             _stake_time = block.number - staker[_addr].init_block;
