@@ -42,19 +42,11 @@
 		"name": "staker_info",
 		"outputs": [
 			{
-				"name": "weight",
+				"name": "_amount",
 				"type": "uint256"
 			},
 			{
-				"name": "init",
-				"type": "uint256"
-			},
-			{
-				"name": "_stake_time",
-				"type": "uint256"
-			},
-			{
-				"name": "_reward",
+				"name": "_time",
 				"type": "uint256"
 			}
 		],
@@ -214,12 +206,6 @@
 		"payable": false,
 		"stateMutability": "view",
 		"type": "function"
-	},
-	{
-		"inputs": [],
-		"payable": true,
-		"stateMutability": "payable",
-		"type": "constructor"
 	},
 	{
 		"payable": true,
