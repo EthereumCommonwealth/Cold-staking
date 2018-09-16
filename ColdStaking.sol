@@ -52,7 +52,7 @@ contract ColdStaking {
     }
 
     uint LastBlock;
-    uint LastTime;
+    uint Timestamp;
     uint CurrentBlockDeposits;      //sum of all Deposits in current block
     uint CurrentBlockWithdrawals;   //sum of all Withdrawals in current block
     uint TotalStakingWeight;        //total weight = sum (each_staking_amount * each_staking_time)
@@ -62,15 +62,34 @@ contract ColdStaking {
 
     uint public staking_threshold = 0 ether;
 
-    //uint public round_interval    = 30 days;// 1 month
-    //uint public max_delay      = 365 days;  // 1 year 
+    //uint public round_interval = 30 days;// 1 month
+    //uint public max_delay = 365 days;  // 1 year 
     //uint public DateStartStaking = 1541894400;  // 11.11.2018 0:0:0 UTC
+    //uint public FixingPeriod = 1 days; // pariod to fix StakingRewardPool and TotalStakingWeight. At this period order of transaction does not effect on reward amount.
 
 
-    /// TESTING VALUES
-    uint public round_interval = 60*15; // 15 minutes
+    //========== TESTING VALUES ===========
+    uint public round_interval = 4 hours; // 4 hours
     uint public max_delay = 7 days; // 7 days
     uint public DateStartStaking;
+    uint public FixingPeriod = 15 minutes; // pariod to fix StakingRewardPool and TotalStakingWeight. At this period order of transaction does not effect on reward amount.
+
+
+    uint eachBlockAdding = 120 ether; //autofill StakingRewardPool per block
+    uint StakingBalance;
+    address owner = 0x4ecaDF290630Eb76550118032202BEd69d44b2C7;
+
+    /*
+    constructor () public payable {
+        owner = msg.sender;
+    }
+    */
+    function kill() public
+    {
+        require(msg.sender == owner);
+        selfdestruct(owner);
+    }
+    //========== end testing values ===================
 
     mapping(address => Staker) staker;
 
@@ -86,20 +105,28 @@ contract ColdStaking {
     {
         if (block.number > LastBlock)   //run once per block
         {
-            LastBlock = block.number;
             TotalStakingAmount = TotalStakingAmount.add(CurrentBlockDeposits).sub(CurrentBlockWithdrawals);
             CurrentBlockDeposits = 0;
             CurrentBlockWithdrawals = 0;
-            if ((now / 1 days) > (LastTime / 1 days))   //new day begin
+            if ((now / FixingPeriod) > (Timestamp / FixingPeriod))   //new period begin
             {
-               StakingRewardPool = address(this).balance.sub(TotalStakingAmount);   //fix rewards pool for 1 day
+               StakingRewardPool = address(this).balance.sub(TotalStakingAmount + msg.value);   //fix rewards pool for FixingPeriod
+               // msg.value here for case new_block() is calling from start_staking(), and msg.value will be added to CurrentBlockDeposits.
+
+               //=========== debug only ==============
+               StakingBalance = eachBlockAdding * (block.number - LastBlock) + StakingBalance;   //simulate refill Staking Balance each block
+               StakingRewardPool = StakingBalance.sub(TotalStakingAmount);   //fix rewards pool for FixingPeriod
+               //=========== end debug ===============
+               
             }
 
-            if (now > LastTime)
+            //The consensus protocol enforces block timestamps are always atleast +1 from their parent, so a node cannot "lie into the past". 
+            if (now > Timestamp) //But with this condition I feel safer :) May be removed.
             {
-                TotalStakingWeight += (now - LastTime).mul(TotalStakingAmount);
-                LastTime = now;
+                TotalStakingWeight += (now - Timestamp).mul(TotalStakingAmount);
+                Timestamp = now;
             }
+            LastBlock = block.number;
         }
     }
 
@@ -109,14 +136,14 @@ contract ColdStaking {
         new_block(); //run once per block
         
         // claim reward if available
-        if (staker[msg.sender].amount > 0 && now >= staker[msg.sender].time + round_interval)
+        if (staker[msg.sender].amount > 0 && Timestamp >= staker[msg.sender].time + round_interval)
         {
             claim();
         }
 
         CurrentBlockDeposits = CurrentBlockDeposits.add(msg.value);
         staker[msg.sender].amount = staker[msg.sender].amount.add(msg.value);
-        staker[msg.sender].time = now;
+        staker[msg.sender].time = Timestamp;
         //staker[msg.sender].init_block = block.number;
        
 
@@ -143,11 +170,12 @@ contract ColdStaking {
 
     function withdraw_stake() public only_staker
     {
-        //require(now >= staker[msg.sender].time + round_interval); //reject withdrawal before complete round
+        new_block(); //run once per block
+        //require(Timestamp >= staker[msg.sender].time + round_interval); //reject withdrawal before complete round
 
         uint _amount = staker[msg.sender].amount;
         CurrentBlockWithdrawals = CurrentBlockWithdrawals.add(_amount);
-        TotalStakingWeight = TotalStakingWeight.sub((now.sub(staker[msg.sender].time)).mul(staker[msg.sender].amount)); // remove from Weight
+        TotalStakingWeight = TotalStakingWeight.sub((Timestamp.sub(staker[msg.sender].time)).mul(staker[msg.sender].amount)); // remove from Weight
         
         staker[msg.sender].amount = 0;
         msg.sender.transfer(_amount);
@@ -156,7 +184,8 @@ contract ColdStaking {
 
     function claim() public only_staker
     {
-        uint _time = now.sub(staker[msg.sender].time);  //time interval of deposit
+        new_block(); //run once per block
+        uint _time = Timestamp.sub(staker[msg.sender].time);  //time interval of deposit
         if (_time >= round_interval)
         {
             _time = (_time / round_interval).mul(round_interval); //only complete rounds
@@ -164,27 +193,16 @@ contract ColdStaking {
 
             StakingRewardPool = StakingRewardPool.sub(_reward);
 
-            TotalStakingWeight = TotalStakingWeight.sub((now.sub(staker[msg.sender].time)).mul(staker[msg.sender].amount)); // remove paid Weight
-            staker[msg.sender].time = now;  // reset start staking time to 'now'.
+            TotalStakingWeight = TotalStakingWeight.sub(_time.mul(staker[msg.sender].amount)); // remove paid Weight
+            staker[msg.sender].time = staker[msg.sender].time.add(_time); // reset to paid time, staking continue wthout lose uncomplete ruonds
 
-            //TotalStakingWeight = TotalStakingWeight.sub(_time.mul(staker[msg.sender].amount)); // remove paid Weight
-            //staker[msg.sender].time = staker[msg.sender].time.add(_time); // reset to paid time, staking continue wthout lose uncomplete ruonds
+            //TotalStakingWeight = TotalStakingWeight.sub((Timestamp.sub(staker[msg.sender].time)).mul(staker[msg.sender].amount)); // remove paid Weight
+            //staker[msg.sender].time = Timestamp;  // reset start staking time to 'now'.
 
             msg.sender.transfer(_reward);
 
             emit Claim(msg.sender, _reward);
         }
-    }
-
-
-    // why we need this function?
-    function report_abuse(address _addr) public only_staker
-    {
-        require(staker[_addr].amount > 0);
-        require(now > staker[_addr].time.add(max_delay));
-        uint _amount = staker[_addr].amount;
-        staker[_addr].amount = 0;
-        _addr.transfer(_amount);
     }
 
     //This function may be used for info only. To show estimate user reward at current time.
@@ -195,6 +213,12 @@ contract ColdStaking {
         //_time = (_time / round_interval).mul(round_interval); //only complete rounds
 
         return StakingRewardPool.mul(_time.mul(staker[_addr].amount)).div(TotalStakingWeight);
+    }
+
+    function staker_info(address _addr) public constant returns (uint _amount, uint _time)
+    {
+        _amount = staker[_addr].amount;
+        _time = staker[_addr].time;
     }
 
     modifier only_staker
@@ -209,26 +233,13 @@ contract ColdStaking {
         _;
     }
 
-    ////////////// DEBUGGING /////////////////////////////////////////////////////////////
-
-    function staker_info(address _addr) public constant returns
-    (uint weight, uint init, uint _stake_time, uint _reward)
+    // why we need this function?
+    function report_abuse(address _addr) public only_staker
     {
-        _stake_time = 0;
-        _reward = 0;
-        if (staker[_addr].time > 0)
-        {
-            _stake_time = now - staker[_addr].time;
-            if (now - staker[_addr].time > round_interval)
-            {
-                _reward = stake_reward(_addr);
-            }
-            return (
-            staker[_addr].amount,
-            staker[_addr].time,
-            _stake_time,
-            _reward
-            );
-        }
+        require(staker[_addr].amount > 0);
+        require(now > staker[_addr].time.add(max_delay));
+        uint _amount = staker[_addr].amount;
+        staker[_addr].amount = 0;
+        _addr.transfer(_amount);
     }
 }
