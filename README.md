@@ -8,5 +8,4 @@ New Staking Reward formula: https://docs.google.com/document/d/1uckDVbgAj6N6Nx6S
 
 Some lines are comment in case it optional.
 
-Deployed to Callisto Testnet 3.0 at address: 0xad71f50087ac343eeda95ae54bbdaaa59a45d6b1
-
+Deployed to Callisto Testnet 3.0 at address: 0x5532e652ba4873c0214d9f2e5f9d0e61a875f152
