@@ -101,7 +101,7 @@ contract ColdStaking {
         start_staking();
     }
 
-    function new_block() private
+    function new_block() public
     {
         if (block.number > LastBlock)   //run once per block
         {
