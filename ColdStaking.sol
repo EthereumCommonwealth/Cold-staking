@@ -69,7 +69,7 @@ contract ColdStaking {
 
 
     //========== TESTING VALUES ===========
-    uint public round_interval = 4 hours; // 4 hours
+    uint public round_interval = 1 hours; // 1 hours
     uint public max_delay = 7 days; // 7 days
     uint public DateStartStaking;
     uint public FixingPeriod = 15 minutes; // pariod to fix StakingRewardPool and TotalStakingWeight. At this period order of transaction does not effect on reward amount.
@@ -77,13 +77,13 @@ contract ColdStaking {
 
     uint eachBlockAdding = 120 ether; //autofill StakingRewardPool per block
     uint StakingBalance;
-    address owner = 0x4ecaDF290630Eb76550118032202BEd69d44b2C7;
+    address owner;
 
-    /*
+    
     constructor () public payable {
         owner = msg.sender;
     }
-    */
+    
     function kill() public
     {
         require(msg.sender == owner);
@@ -114,6 +114,7 @@ contract ColdStaking {
                // msg.value here for case new_block() is calling from start_staking(), and msg.value will be added to CurrentBlockDeposits.
 
                //=========== debug only ==============
+               if (LastBlock == 0) LastBlock = block.number - 1; //for first call
                StakingBalance = eachBlockAdding * (block.number - LastBlock) + StakingBalance;   //simulate refill Staking Balance each block
                StakingRewardPool = StakingBalance.sub(TotalStakingAmount);   //fix rewards pool for FixingPeriod
                //=========== end debug ===============
