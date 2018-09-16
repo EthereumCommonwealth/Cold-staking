@@ -208,6 +208,12 @@
 		"type": "function"
 	},
 	{
+		"inputs": [],
+		"payable": true,
+		"stateMutability": "payable",
+		"type": "constructor"
+	},
+	{
 		"payable": true,
 		"stateMutability": "payable",
 		"type": "fallback"
