@@ -29,11 +29,10 @@ contract ColdStaking {
 
 
     /// TESTING VALUES
-    uint256 public round_interval = 15; // approx. 1 month in blocks
-    uint256 public max_delay = 7 * 6000; // approx. 1 year in blocks
+    uint256 public round_interval = 24*60*4; // approx. 1 day in blocks
+    uint256 public max_delay = 12 * 24*60*4; // approx. 12 days in blocks
 
     mapping(address => Staker) staker;
-    mapping(address => bool) private muted;
 
 
     function() public payable
@@ -50,7 +49,8 @@ contract ColdStaking {
         staker[msg.sender].weight = staker[msg.sender].weight.add(msg.value);
         staker[msg.sender].init_block = block.number;
 
-        StartStaking(
+
+        emit StartStaking(
             msg.sender,
             msg.value,
             staker[msg.sender].weight,
@@ -62,9 +62,7 @@ contract ColdStaking {
 
 
     function DEBUG_donation() public payable {
-
-        DonationDeposited(msg.sender, msg.value);
-
+        emit DonationDeposited(msg.sender, msg.value);
     }
 
     function claim_and_withdraw() public
@@ -73,25 +71,25 @@ contract ColdStaking {
         withdraw_stake();
     }
 
-    function withdraw_stake() public only_staker mutex(msg.sender)
-    {
-        
-        msg.sender.transfer(staker[msg.sender].weight);
-        staking_pool = staking_pool.sub(staker[msg.sender].weight);
-        staker[msg.sender].weight = staker[msg.sender].weight.sub(staker[msg.sender].weight);
-        WithdrawStake(msg.sender, staker[msg.sender].weight);
 
+    function withdraw_stake() public only_staker
+    {
+        uint _weight = staker[msg.sender].weight;
+        staking_pool = staking_pool.sub(_weight);
+        staker[msg.sender].weight = 0;
+        msg.sender.transfer(_weight);
+        emit WithdrawStake(msg.sender, _weight);
     }
 
-    function claim() public only_staker mutex(msg.sender)
+    function claim() public only_staker
     {
         require(block.number >= staker[msg.sender].init_block.add(round_interval));
-
+        
         uint256 _reward = stake_reward(msg.sender);
-        msg.sender.transfer(_reward);
         staker[msg.sender].init_block = block.number;
-
-        Claim(msg.sender, _reward);
+        msg.sender.transfer(_reward);
+        
+        emit Claim(msg.sender, _reward);
     }
 
     function stake_reward(address _addr) public constant returns (uint256 _reward)
@@ -107,13 +105,13 @@ contract ColdStaking {
         return ( (reward() * staker[_addr].weight) / (staking_pool + staker[_addr].weight * (staker_time_stake(_addr) - 1)) );
     }
 
-    function report_abuse(address _addr) public only_staker mutex(_addr)
+    function report_abuse(address _addr) public only_staker
     {
-        assert(staker[_addr].weight > 0);
-        assert(block.number > staker[_addr].init_block.add(max_delay));
-
-        _addr.transfer(staker[msg.sender].weight);
+        require(staker[_addr].weight > 0);
+        require(block.number > staker[_addr].init_block.add(max_delay));
+        uint _weight = staker[_addr].weight;
         staker[_addr].weight = 0;
+        _addr.transfer(_weight);
     }
 
     function reward() public constant returns (uint256)
@@ -123,29 +121,20 @@ contract ColdStaking {
 
     modifier only_staker
     {
-        assert(staker[msg.sender].weight > 0);
+        require(staker[msg.sender].weight > 0);
         _;
     }
 
-    modifier mutex(address _target)
-    {
-        if (muted[_target])
-        {
-            revert();
-        }
-
-        muted[_target] = true;
-        _;
-        muted[_target] = false;
-    }
 
     ////////////// DEBUGGING /////////////////////////////////////////////////////////////
 
     function staker_info(address _addr) public constant returns
-    (uint256 weight, uint256 init, uint256 stake_time, uint256 reward)
+
+    (uint256 weight, uint256 init, uint256 _stake_time, uint256 _reward)
     {
-        uint256 _stake_time = 0;
-        uint256 _reward = 0;
+        _stake_time = 0;
+        _reward = 0;
+        
         if (staker[_addr].init_block > 0)
         {
             _stake_time = block.number - staker[_addr].init_block;
