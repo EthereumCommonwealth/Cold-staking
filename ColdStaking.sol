@@ -75,7 +75,7 @@ contract ColdStaking {
     uint public FixingPeriod = 15 minutes; // pariod to fix StakingRewardPool and TotalStakingWeight. At this period order of transaction does not effect on reward amount.
 
 
-    uint eachBlockAdding = 120 ether; //autofill StakingRewardPool per block
+    uint eachBlockAdding = 12 ether; //autofill StakingRewardPool per block
     uint StakingBalance;
     address owner;
 
@@ -137,15 +137,18 @@ contract ColdStaking {
         new_block(); //run once per block
         
         // claim reward if available
-        if (staker[msg.sender].amount > 0 && Timestamp >= staker[msg.sender].time + round_interval)
+        if (staker[msg.sender].amount > 0)
         {
-            claim();
+            if (Timestamp >= staker[msg.sender].time + round_interval)
+            { 
+                claim(); 
+            }
+            TotalStakingWeight = TotalStakingWeight.sub((Timestamp.sub(staker[msg.sender].time)).mul(staker[msg.sender].amount)); // remove from Weight        
         }
 
         CurrentBlockDeposits = CurrentBlockDeposits.add(msg.value);
-        staker[msg.sender].amount = staker[msg.sender].amount.add(msg.value);
         staker[msg.sender].time = Timestamp;
-        //staker[msg.sender].init_block = block.number;
+        staker[msg.sender].amount = staker[msg.sender].amount.add(msg.value);
        
 
         emit StartStaking(
