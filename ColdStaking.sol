@@ -101,7 +101,7 @@ contract ColdStaking {
         start_staking();
     }
 
-    function new_block() public
+    function new_block() public //this function can be called for manualy update TotalStakingAmount value.
     {
         if (block.number > LastBlock)   //run once per block
         {
