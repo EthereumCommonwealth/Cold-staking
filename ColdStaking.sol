@@ -72,7 +72,7 @@ contract ColdStaking {
     uint public round_interval = 1 hours; // 1 hours
     uint public max_delay = 7 days; // 7 days
     uint public DateStartStaking;
-    uint public FixingPeriod = 15 minutes; // pariod to fix StakingRewardPool and TotalStakingWeight. At this period order of transaction does not effect on reward amount.
+    //uint public FixingPeriod = 15 minutes; // pariod to fix StakingRewardPool and TotalStakingWeight. At this period order of transaction does not effect on reward amount.
 
 
     uint eachBlockAdding = 12 ether; //autofill StakingRewardPool per block
@@ -108,9 +108,9 @@ contract ColdStaking {
             TotalStakingAmount = TotalStakingAmount.add(CurrentBlockDeposits).sub(CurrentBlockWithdrawals);
             CurrentBlockDeposits = 0;
             CurrentBlockWithdrawals = 0;
-            if ((now / FixingPeriod) > (Timestamp / FixingPeriod))   //new period begin
-            {
-               StakingRewardPool = address(this).balance.sub(TotalStakingAmount + msg.value);   //fix rewards pool for FixingPeriod
+            //if ((now / FixingPeriod) > (Timestamp / FixingPeriod))   //new period begin
+            //{
+               StakingRewardPool = address(this).balance.sub(TotalStakingAmount + msg.value);   //fix rewards pool for this block
                // msg.value here for case new_block() is calling from start_staking(), and msg.value will be added to CurrentBlockDeposits.
 
                //=========== debug only ==============
@@ -119,7 +119,7 @@ contract ColdStaking {
                StakingRewardPool = StakingBalance.sub(TotalStakingAmount);   //fix rewards pool for FixingPeriod
                //=========== end debug ===============
                
-            }
+            //}
 
             //The consensus protocol enforces block timestamps are always atleast +1 from their parent, so a node cannot "lie into the past". 
             if (now > Timestamp) //But with this condition I feel safer :) May be removed.
