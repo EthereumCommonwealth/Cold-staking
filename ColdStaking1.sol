@@ -115,9 +115,9 @@ contract ColdStaking {
             //The consensus protocol enforces block timestamps are always atleast +1 from their parent, so a node cannot "lie into the past". 
             if (now > Timestamp) //But with this condition I feel safer :) May be removed.
             {
-                uint _blocks = block.numbe - LastBlock;
+                uint _blocks = block.number - LastBlock;
                 uint _seconds = now - Timestamp;
-                if (_seconds > _blocks * 25) 
+                if (_seconds > _blocks * 25) //if time goes far in the future, then use new time as 25 second * blocks
                 {
                     _seconds = _blocks * 25;
                 }
