@@ -242,7 +242,6 @@ contract ColdStaking {
         _;
     }
 
-    // why we need this function?
     function report_abuse(address _addr) public only_staker
     {
         require(staker[_addr].amount > 0);
