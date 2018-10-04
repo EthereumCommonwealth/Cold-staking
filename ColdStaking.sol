@@ -237,7 +237,7 @@ contract ColdStaking {
         uint _StakingInterval = Timestamp.sub(staker[msg.sender].time);  //time interval of deposit
         if (_StakingInterval >= round_interval)
         {
-            uint _StakerWeight = _StakingInterval.mul(staker[msg.sender].amount); //Weight of completed rounds
+            uint _StakerWeight = _StakingInterval.mul(staker[msg.sender].amount); //Staker weight
             uint _reward = StakingRewardPool.mul(_StakerWeight).div(TotalStakingWeight);  //StakingRewardPool * _StakerWeight/TotalStakingWeight
 
             StakingRewardPool = StakingRewardPool.sub(_reward);
