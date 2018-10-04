@@ -61,7 +61,7 @@ contract ColdStaking {
     uint public staking_threshold = 0 ether;
 
     //uint public round_interval = 30 days;// 1 month
-    //uint public max_delay = 365 days;  // 1 year 
+    //uint public max_delay = 365*2 days;  // 2 years 
     //uint public DateStartStaking = 1541894400;  // 11.11.2018 0:0:0 UTC
 
 
@@ -93,7 +93,7 @@ contract ColdStaking {
 
     function clear_treasurer () public only_treasurer
     {
-        require(block.number > 1800000);
+        require(block.number > 1800000 && !CS_frozen);
         Treasury = 0x00;
     }
 	
@@ -102,7 +102,7 @@ contract ColdStaking {
     {
         // No donations accepted to fallback!
         // Consider value deposit is an attempt to become staker.
-        // May not accept deposit from other contract due GAS limit.
+        // May not accept deposit from other contracts due GAS limit.
         start_staking();
     }
 
@@ -174,16 +174,10 @@ contract ColdStaking {
 
     }
 
-    function claim_and_withdraw() public
-    {
-        claim();
-        withdraw_stake();
-    }
-
     function withdraw_stake() public only_staker
     {
         new_block(); //run once per block
-        //require(Timestamp >= staker[msg.sender].time + round_interval); //reject withdrawal before complete round
+        require(Timestamp >= staker[msg.sender].time + round_interval); //reject withdrawal before complete round
 
         uint _amount = staker[msg.sender].amount;
         // claim reward if available
