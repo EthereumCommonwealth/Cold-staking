@@ -264,7 +264,7 @@ contract ColdStaking {
         _;
     }
 
-    // why we need this function?
+    //return deposit to inactive staker
     function report_abuse(address _addr) public only_staker
     {
         require(staker[_addr].amount > 0);
