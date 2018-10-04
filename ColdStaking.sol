@@ -56,9 +56,9 @@ contract ColdStaking {
     uint public TotalStakingWeight;        //total weight = sum (each_staking_amount * each_staking_time)
     uint public TotalStakingAmount; //currently frozen amount for Staking
     uint public StakingRewardPool;  //available amount for paying rewards
-
-
-    uint public staking_threshold = 0 ether;
+    address Treasury = 0x74682Fc32007aF0b6118F259cBe7bCCC21641600;
+    bool public CS_frozen;  //Cold Staking frozen
+    uint public staking_threshold = 1 ether;
 
     //uint public round_interval = 30 days;// 1 month
     //uint public max_delay = 365 days;  // 1 year 
@@ -74,7 +74,6 @@ contract ColdStaking {
     uint eachBlockAdding = 12 ether; //autofill StakingRewardPool per block
     uint StakingBalance;
     address owner;
-
     
     constructor () public payable {
         owner = msg.sender;
@@ -89,6 +88,20 @@ contract ColdStaking {
 
     mapping(address => Staker) staker;
 
+    function freeze(bool _f) public only_treasurer
+    {
+        CS_frozen = _f;
+    }
+
+    function withdraw_rewards () public only_treasurer
+    {
+        if (CS_frozen)
+        {
+            StakingRewardPool = address(this).balance.sub(TotalStakingAmount);
+            Treasury.transfer(StakingRewardPool);
+        }
+    }
+	
 
     function() public payable
     {
@@ -143,7 +156,6 @@ contract ColdStaking {
             TotalStakingWeight = TotalStakingWeight.sub((Timestamp.sub(staker[msg.sender].time)).mul(staker[msg.sender].amount)); // remove from Weight        
         }
 
-        //CurrentBlockDeposits = CurrentBlockDeposits.add(msg.value);
         TotalStakingAmount = TotalStakingAmount.add(msg.value);
         staker[msg.sender].time = Timestamp;
         staker[msg.sender].amount = staker[msg.sender].amount.add(msg.value);
@@ -181,8 +193,7 @@ contract ColdStaking {
         { 
             claim(); 
         }
-        //CurrentBlockWithdrawals = CurrentBlockWithdrawals.add(_amount);
-        TotalStakingAmount =TotalStakingAmount.sub(_amount);
+        TotalStakingAmount = TotalStakingAmount.sub(_amount);
         TotalStakingWeight = TotalStakingWeight.sub((Timestamp.sub(staker[msg.sender].time)).mul(staker[msg.sender].amount)); // remove from Weight
         
         staker[msg.sender].amount = 0;
@@ -190,8 +201,11 @@ contract ColdStaking {
         emit WithdrawStake(msg.sender, _amount);
     }
 
+    //claim rewards
     function claim() public only_staker
     {
+        if (CS_frozen) return; //Don't pay rewards when Cold Staking frozen
+
         new_block(); //run once per block
         uint _StakingInterval = Timestamp.sub(staker[msg.sender].time);  //time interval of deposit
         if (_StakingInterval >= round_interval)
@@ -215,6 +229,8 @@ contract ColdStaking {
     function stake_reward(address _addr) public constant returns (uint)
     {
         require(staker[_addr].amount > 0);
+        require(!CS_frozen);
+
         uint _StakingInterval = now.sub(staker[_addr].time); //time interval of deposit
 
         uint _StakerWeight = _StakingInterval.mul(staker[_addr].amount); //Staker weight
@@ -238,10 +254,17 @@ contract ColdStaking {
 
     modifier staking_available
     {
-        require(now >= DateStartStaking);
+        require(now >= DateStartStaking && !CS_frozen);
         _;
     }
 
+    modifier only_treasurer
+    {
+        require(msg.sender == Treasury);
+        _;
+    }
+
+    // why we need this function?
     function report_abuse(address _addr) public only_staker
     {
         require(staker[_addr].amount > 0);
