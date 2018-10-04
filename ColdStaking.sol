@@ -51,14 +51,14 @@ contract ColdStaking {
         uint time;
     }
 
-    uint LastBlock;
-    uint Timestamp;
+    uint public LastBlock;
+    uint public Timestamp;
     uint public TotalStakingWeight;        //total weight = sum (each_staking_amount * each_staking_time)
     uint public TotalStakingAmount; //currently frozen amount for Staking
     uint public StakingRewardPool;  //available amount for paying rewards
-    address Treasury = 0x74682Fc32007aF0b6118F259cBe7bCCC21641600;
+    address public Treasury = 0x74682Fc32007aF0b6118F259cBe7bCCC21641600;
     bool public CS_frozen;  //Cold Staking frozen
-    uint public staking_threshold = 1 ether;
+    uint public staking_threshold = 0 ether;
 
     //uint public round_interval = 30 days;// 1 month
     //uint public max_delay = 365 days;  // 1 year 
@@ -71,22 +71,11 @@ contract ColdStaking {
     uint public DateStartStaking;
 
 
-    uint eachBlockAdding = 12 ether; //autofill StakingRewardPool per block
-    uint StakingBalance;
-    address owner;
-    
-    constructor () public payable {
-        owner = msg.sender;
-    }
-    
-    function kill() public
-    {
-        require(msg.sender == owner);
-        selfdestruct(owner);
-    }
+    uint public eachBlockAdding = 12 ether; //autofill StakingRewardPool per block
+    uint public StakingBalance;
     //========== end testing values ===================
 
-    mapping(address => Staker) staker;
+    mapping(address => Staker) public staker;
 
     function freeze(bool _f) public only_treasurer
     {
@@ -100,6 +89,12 @@ contract ColdStaking {
             StakingRewardPool = address(this).balance.sub(TotalStakingAmount);
             Treasury.transfer(StakingRewardPool);
         }
+    }
+
+    function clear_treasurer () public only_treasurer
+    {
+        require(block.number > 1800000);
+        Treasury = 0x00;
     }
 	
 
