@@ -205,35 +205,6 @@ contract ColdStaking {
             emit Claim(msg.sender, _reward);
         }
     }
-   
-
-    function reinvest() public only_staker
-    {
-        require(!CS_frozen);
-        new_block(); //run once per block.
-
-        uint _StakingInterval = Timestamp.sub(staker[msg.sender].time);  //time interval of deposit.
-        if (_StakingInterval >= round_interval)
-        {
-            uint _StakerWeight = _StakingInterval.mul(staker[msg.sender].amount); //Staker weight.
-            uint _reward = StakingRewardPool.mul(_StakerWeight).div(TotalStakingWeight);  //StakingRewardPool * _StakerWeight/TotalStakingWeight.
-
-            StakingRewardPool = StakingRewardPool.sub(_reward);
-            TotalStakingWeight = TotalStakingWeight.sub(_StakerWeight); // remove paid Weight.
-
-            staker[msg.sender].time = Timestamp; // reset to paid time to now.
-            staker[msg.sender].amount = staker[msg.sender].amount.add(_reward); //add reinvested amount.
-            TotalStakingAmount = TotalStakingAmount.add(_reward);
-
-            emit StartStaking(
-                msg.sender,
-                _reward,
-                staker[msg.sender].amount,
-                staker[msg.sender].time
-            );
-        }
-        
-    }
 
     //This function may be used for info only. This can show estimated user reward at current time.
     function stake_reward(address _addr) public constant returns (uint)
