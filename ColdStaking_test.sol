@@ -76,7 +76,11 @@ contract ColdStaking {
     //========== end testing values ===================
 
     mapping(address => Staker) public staker;
-
+    
+    constructor () public {
+        Timestamp = now;
+    }
+    
     function freeze(bool _f) public only_treasurer
     {
         CS_frozen = _f;
