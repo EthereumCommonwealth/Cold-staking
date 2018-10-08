@@ -51,8 +51,10 @@ contract ColdStaking {
         uint time;
     }
 
-    uint public LastBlock;
-    uint public Timestamp;          //timestamp of the last interaction with the contract.
+
+    uint public LastBlock = block.number;
+    uint public Timestamp = now;    //timestamp of the last interaction with the contract.
+
     uint public TotalStakingWeight; //total weight = sum (each_staking_amount * each_staking_time).
     uint public TotalStakingAmount; //currently frozen amount for Staking.
     uint public StakingRewardPool;  //available amount for paying rewards.
@@ -72,11 +74,7 @@ contract ColdStaking {
     //========== end testing values ===================*/
     
     mapping(address => Staker) public staker;
-    
-    constructor () public {
-        Timestamp = now;
-    }
-    
+
     function freeze(bool _f) public only_treasurer
     {
         CS_frozen = _f;
