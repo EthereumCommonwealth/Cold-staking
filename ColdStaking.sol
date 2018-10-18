@@ -165,7 +165,7 @@ contract ColdStaking {
 
         uint _amount = staker[msg.sender].amount;
         // claim reward if available.
-	claim(); 
+        claim(); 
         TotalStakingAmount = TotalStakingAmount.sub(_amount);
         TotalStakingWeight = TotalStakingWeight.sub((Timestamp.sub(staker[msg.sender].time)).mul(staker[msg.sender].amount)); // remove from Weight.
         
@@ -203,13 +203,21 @@ contract ColdStaking {
         require(staker[_addr].amount > 0);
         require(!CS_frozen);
 
-        uint _StakingInterval = now.sub(staker[_addr].time); //time interval of deposit.
-
+        uint _blocks = block.number - LastBlock;
+        uint _seconds = now - Timestamp;
+        if (_seconds > _blocks * 25) //if time goes far in the future, then use new time as 25 second * blocks.
+        {
+            _seconds = _blocks * 25;
+        }
+        uint _Timestamp = Timestamp + _seconds;
+        uint _TotalStakingWeight = TotalStakingWeight + _seconds.mul(TotalStakingAmount);
+        uint _StakingInterval = _Timestamp.sub(staker[_addr].time); //time interval of deposit.
+	
         //uint _StakerWeight = _StakingInterval.mul(staker[_addr].amount); //Staker weight.
         uint _CompleteRoundsInterval = (_StakingInterval / round_interval).mul(round_interval); //only complete rounds.
         uint _StakerWeight = _CompleteRoundsInterval.mul(staker[_addr].amount); //Weight of completed rounds.
-	uint _StakingRewardPool = address(this).balance.sub(TotalStakingAmount);
-        return _StakingRewardPool.mul(_StakerWeight).div(TotalStakingWeight);    //StakingRewardPool * _StakerWeight/TotalStakingWeight
+        uint _StakingRewardPool = address(this).balance.sub(TotalStakingAmount);
+        return _StakingRewardPool.mul(_StakerWeight).div(_TotalStakingWeight);    //StakingRewardPool * _StakerWeight/TotalStakingWeight
     }
 
     modifier only_staker
