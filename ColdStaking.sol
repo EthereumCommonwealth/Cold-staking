@@ -61,9 +61,9 @@ contract ColdStaking {
     uint public staking_threshold = 0 ether;
     address public Treasury       = 0x3c06f218ce6dd8e2c535a8925a2edf81674984d9; // Callisto Staking Reserve address.
 
-    uint public round_interval   = 27 days;     // 1 month.
-    uint public max_delay        = 365 * 2 days;// 2 years.
-    uint public DateStartStaking = 1541980800;  // 12.11.2018 0:0:0 UTC.
+    uint public round_interval   = 10 minutes; // TESTING VALUE
+    uint public max_delay        = 2 days;     // TESTING VALUE
+    uint public DateStartStaking = 0;          // TESTING VALUE
 
 
     /*========== TESTING VALUES ===========
