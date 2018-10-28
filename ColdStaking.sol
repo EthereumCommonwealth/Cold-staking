@@ -66,10 +66,11 @@ contract ColdStaking {
     uint public DateStartStaking = 1541980800;  // 12.11.2018 0:0:0 UTC.
 
 
-    /*========== TESTING VALUES ===========
-    uint public round_interval = 1 hours; // 1 hours.
-    uint public max_delay = 7 days; // 7 days.
-    //========== end testing values ===================*/
+    //========== TESTNET VALUES ===========
+    //uint public round_interval   = 10 minutes; 
+    //uint public max_delay        = 2 days;
+    //uint public DateStartStaking = 0;
+    //========== END TEST VALUES ==========
     
     mapping(address => Staker) public staker;
 
