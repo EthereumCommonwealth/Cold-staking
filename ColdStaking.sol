@@ -191,7 +191,7 @@ contract ColdStaking {
             StakingRewardPool = StakingRewardPool.sub(_reward);
             TotalStakingWeight = TotalStakingWeight.sub(_StakerWeight); // remove paid Weight.
 
-            staker[msg.sender].time = staker[msg.sender].time.add(_CompleteRoundsInterval); // reset to paid time, staking continue wthout lose uncomplete ruonds.
+            staker[msg.sender].time = staker[msg.sender].time.add(_CompleteRoundsInterval); // reset to paid time, staking continue without a loss of incomplete rounds.
 	    
             msg.sender.transfer(_reward);
             emit Claim(msg.sender, _reward);
