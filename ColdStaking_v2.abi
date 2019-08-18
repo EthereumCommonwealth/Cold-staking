@@ -1,36 +1,26 @@
 [
 	{
-		"constant": true,
-		"inputs": [],
-		"name": "CS_frozen",
-		"outputs": [
+		"constant": false,
+		"inputs": [
 			{
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "TotalStakingWeight",
-		"outputs": [
+				"name": "voter",
+				"type": "address"
+			},
 			{
-				"name": "",
+				"name": "_voteWithdrawalDeadline",
 				"type": "uint256"
 			}
 		],
+		"name": "vote_casted",
+		"outputs": [],
 		"payable": false,
-		"stateMutability": "view",
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
 		"constant": true,
 		"inputs": [],
-		"name": "StakingRewardPool",
+		"name": "rewardToRedistribute",
 		"outputs": [
 			{
 				"name": "",
@@ -48,6 +38,48 @@
 		"outputs": [],
 		"payable": true,
 		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "lastTotalReward",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "lastBlockNumber",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "claim_delay",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -71,21 +103,7 @@
 	{
 		"constant": true,
 		"inputs": [],
-		"name": "Treasury",
-		"outputs": [
-			{
-				"name": "",
-				"type": "address"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "staking_threshold",
+		"name": "totalClaimedReward",
 		"outputs": [
 			{
 				"name": "",
@@ -97,9 +115,51 @@
 		"type": "function"
 	},
 	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_new_governance_contract",
+				"type": "address"
+			}
+		],
+		"name": "set_governance_contract",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"constant": true,
 		"inputs": [],
-		"name": "round_interval",
+		"name": "deposits_disabled",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "withdrawals_disabled",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "staked_amount",
 		"outputs": [
 			{
 				"name": "",
@@ -121,11 +181,23 @@
 		"name": "staker",
 		"outputs": [
 			{
-				"name": "amount",
+				"name": "stake",
 				"type": "uint256"
 			},
 			{
-				"name": "time",
+				"name": "reward",
+				"type": "uint256"
+			},
+			{
+				"name": "lastClaim",
+				"type": "uint256"
+			},
+			{
+				"name": "lastWeightedBlockReward",
+				"type": "uint256"
+			},
+			{
+				"name": "voteWithdrawalDeadline",
 				"type": "uint256"
 			}
 		],
@@ -134,13 +206,27 @@
 		"type": "function"
 	},
 	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_status",
+				"type": "bool"
+			}
+		],
+		"name": "restrict_withdrawals",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"constant": true,
 		"inputs": [],
-		"name": "DateStartStaking",
+		"name": "governance_contract",
 		"outputs": [
 			{
 				"name": "",
-				"type": "uint256"
+				"type": "address"
 			}
 		],
 		"payable": false,
@@ -162,32 +248,9 @@
 		"type": "function"
 	},
 	{
-		"constant": false,
-		"inputs": [],
-		"name": "new_block",
-		"outputs": [],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"constant": true,
 		"inputs": [],
-		"name": "TotalStakingAmount",
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "LastBlock",
+		"name": "weightedBlockReward",
 		"outputs": [
 			{
 				"name": "",
@@ -202,39 +265,11 @@
 		"constant": false,
 		"inputs": [
 			{
-				"name": "_f",
+				"name": "_status",
 				"type": "bool"
 			}
 		],
-		"name": "freeze",
-		"outputs": [],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [
-			{
-				"name": "_addr",
-				"type": "address"
-			}
-		],
-		"name": "stake_reward",
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [],
-		"name": "withdraw_rewards",
+		"name": "restrict_deposits",
 		"outputs": [],
 		"payable": false,
 		"stateMutability": "nonpayable",
@@ -266,10 +301,22 @@
 	{
 		"constant": true,
 		"inputs": [],
-		"name": "Timestamp",
+		"name": "staker_info",
 		"outputs": [
 			{
-				"name": "",
+				"name": "weight",
+				"type": "uint256"
+			},
+			{
+				"name": "init",
+				"type": "uint256"
+			},
+			{
+				"name": "actual_block",
+				"type": "uint256"
+			},
+			{
+				"name": "_reward",
 				"type": "uint256"
 			}
 		],
@@ -278,13 +325,24 @@
 		"type": "function"
 	},
 	{
-		"constant": false,
+		"constant": true,
 		"inputs": [],
-		"name": "clear_treasurer",
-		"outputs": [],
+		"name": "treasurer",
+		"outputs": [
+			{
+				"name": "",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"payable": false,
 		"stateMutability": "nonpayable",
-		"type": "function"
+		"type": "constructor"
 	},
 	{
 		"payable": true,
@@ -315,7 +373,7 @@
 				"type": "uint256"
 			}
 		],
-		"name": "StartStaking",
+		"name": "Staking",
 		"type": "event"
 	},
 	{
@@ -367,6 +425,40 @@
 			}
 		],
 		"name": "DonationDeposited",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "_voter",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "_time",
+				"type": "uint256"
+			}
+		],
+		"name": "VoterWithrawlDeadlineUpdate",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "_addr",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "value",
+				"type": "uint256"
+			}
+		],
+		"name": "InactiveStaker",
 		"type": "event"
 	}
 ]
