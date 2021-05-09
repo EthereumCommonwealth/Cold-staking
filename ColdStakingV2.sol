@@ -49,7 +49,7 @@ contract ColdStaking {
     {
         uint amount;
         uint time;              // Staking start time or last claim rewards
-        uint weight;            // Number of staking periods (staking period = 27) while money is locked. User will receive rewards only when money is locked.
+        uint multiplier;        // Rewards multiplier = 0.40 + (0.05 * rounds). [0.45..1] (max rounds 12)
         uint end_time;          // Time when staking ends and user may withdraw. After this time user will not receive rewards.
     }
 
@@ -65,10 +65,11 @@ contract ColdStaking {
     uint public constant round_interval   = 27 days;     // 1 month.
     uint public constant max_delay        = 365 days;    // 1 year after staking ends.
     uint public constant DateStartStaking = 1541980800;  // 12.11.2018 0:0:0 UTC.
+
     uint constant NOMINATOR = 10**18;           // Nominator / denominator used for float point numbers
 
     //========== TESTNET VALUES ===========
-    //uint public constant round_interval   = 10 minutes; 
+    //uint public constant round_interval   = 1 hours; 
     //uint public constant max_delay        = 2 days;
     //uint public constant DateStartStaking = 0;
     //========== END TEST VALUES ==========
@@ -125,7 +126,7 @@ contract ColdStaking {
         uint staker_amount = staker[msg.sender].amount;
         uint r = rounds;
         if (r > 12) r = 12;
-        uint weight = (40 + (5 * r)) * NOMINATOR / 100;  // stake weight = 0.40 + (0.05 * rounds). [0.45..1]
+        uint multiplier = (40 + (5 * r)) * NOMINATOR / 100;  // staker multiplier = 0.40 + (0.05 * rounds). [0.45..1]
         uint end_time = _Timestamp.add(round_interval.mul(rounds));
         // claim reward if available.
         if (staker_amount > 0)
@@ -139,11 +140,13 @@ contract ColdStaking {
                 end_time = staker_end_time;     // Staking end time is the bigger from previous and new one.
                 r = (end_time.sub(_Timestamp)).div(round_interval);  // update number of rounds
                 if (r > 12) r = 12;
-                weight = (40 + (5 * r)) * NOMINATOR / 100;  // stake weight = 0.40 + (0.05 * rounds). [0.45..1]
+                multiplier = (40 + (5 * r)) * NOMINATOR / 100;  // staker multiplier = 0.40 + (0.05 * rounds). [0.45..1]
             }
-            if (staker[msg.sender].weight > weight && staker_end_time > _Timestamp) {    // recalculate wight = (staker.weight * staker.amount + new.weight * new.amount) / ( staker.amount + new.amount)
-                weight = ((staker[msg.sender].weight.mul(staker_amount)).add(weight.mul(msg.value))).div(staker_amount.add(msg.value));
-                if (weight > NOMINATOR) weight = NOMINATOR; // weight can't be more then 1
+            // if there is active staking with bigger multiplier
+            if (staker[msg.sender].multiplier > multiplier && staker_end_time > _Timestamp) {
+                // recalculate multiplier = (staker.multiplier * staker.amount + new.multiplier * new.amount) / ( staker.amount + new.amount)
+                multiplier = ((staker[msg.sender].multiplier.mul(staker_amount)).add(multiplier.mul(msg.value))).div(staker_amount.add(msg.value));
+                if (multiplier > NOMINATOR) multiplier = NOMINATOR; // multiplier can't be more then 1
             }
             TotalStakingWeight = TotalStakingWeight.sub((_Timestamp.sub(staker[msg.sender].time)).mul(staker_amount)); // remove from Weight
         }
@@ -151,7 +154,7 @@ contract ColdStaking {
         TotalStakingAmount = TotalStakingAmount.add(msg.value);
         staker[msg.sender].time = _Timestamp;
         staker[msg.sender].amount = staker_amount.add(msg.value);
-        staker[msg.sender].weight = weight;
+        staker[msg.sender].multiplier = multiplier;
         staker[msg.sender].end_time = end_time;
 
         emit StartStaking(
@@ -211,7 +214,7 @@ contract ColdStaking {
             uint _CompleteRoundsInterval = (_StakingInterval / round_interval).mul(round_interval); //only complete rounds.
             uint _StakerWeight = _CompleteRoundsInterval.mul(staker[user].amount); //Weight of completed rounds.
             uint _reward = StakingRewardPool.mul(_StakerWeight).div(TotalStakingWeight);  //StakingRewardPool * _StakerWeight/TotalStakingWeight
-            _reward = _reward.mul(staker[user].weight) / NOMINATOR;   // reduce rewards if staked on less then 12 rounds.
+            _reward = _reward.mul(staker[user].multiplier) / NOMINATOR;   // reduce rewards if staked on less then 12 rounds.
             StakingRewardPool = StakingRewardPool.sub(_reward);
             TotalStakingWeight = TotalStakingWeight.sub(_StakerWeight); // remove paid Weight.
 
@@ -243,7 +246,7 @@ contract ColdStaking {
         uint _StakerWeight = _CompleteRoundsInterval.mul(staker[_addr].amount); //Weight of completed rounds.
         uint _StakingRewardPool = address(this).balance.sub(TotalStakingAmount);
         _reward = _StakingRewardPool.mul(_StakerWeight).div(_TotalStakingWeight);  //StakingRewardPool * _StakerWeight/TotalStakingWeight
-        _reward = _reward.mul(staker[_addr].weight) / NOMINATOR;   // reduce rewards if staked on less then 12 rounds.
+        _reward = _reward.mul(staker[_addr].multiplier) / NOMINATOR;   // reduce rewards if staked on less then 12 rounds.
     }
 
     modifier only_staker
@@ -258,7 +261,7 @@ contract ColdStaking {
         _;
     }
 
-    //return deposit to inactive staker after 1 year when staking end.
+    //return deposit to inactive staker after 1 year when staking ends.
     function report_abuse(address payable _addr) public only_staker
     {
         require(staker[_addr].amount > 0);
@@ -268,7 +271,7 @@ contract ColdStaking {
         uint _amount = staker[_addr].amount;
         
         TotalStakingAmount = TotalStakingAmount.sub(_amount);
-        TotalStakingWeight = TotalStakingWeight.sub((Timestamp.sub(staker[_addr].time)).mul(_amount)); // remove from Weight.
+        TotalStakingWeight = TotalStakingWeight.sub(((staker[_addr].end_time).sub(staker[_addr].time)).mul(_amount)); // remove from Weight.
 
         staker[_addr].amount = 0;
         _addr.transfer(_amount);
