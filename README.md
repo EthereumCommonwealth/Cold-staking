@@ -1,4 +1,4 @@
-# Staking contract at CLO mainnet
+## Staking contract at CLO mainnet (will be deprecated in favor of Cold Staking V2)
 
 Staking contract is currently deployed at Callisto Mainnet: https://explorer2.callisto.network/addr/0xd813419749b3c2cdc94a2f9cfcf154113264a9d6#tab_addr_1
 
