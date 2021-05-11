@@ -64,14 +64,14 @@ contract ColdStaking {
 
     uint public constant round_interval   = 27 days;     // 1 month.
     uint public constant max_delay        = 365 days;    // 1 year after staking ends.
-    uint public constant DateStartStaking = 1541980800;  // 12.11.2018 0:0:0 UTC.
+    uint public constant BlockStartStaking = 7600000;
 
     uint constant NOMINATOR = 10**18;           // Nominator / denominator used for float point numbers
 
     //========== TESTNET VALUES ===========
     //uint public constant round_interval   = 1 hours; 
     //uint public constant max_delay        = 2 days;
-    //uint public constant DateStartStaking = 0;
+    //uint public constant BlockStartStaking = 0;
     //========== END TEST VALUES ==========
     
     mapping(address => Staker) public staker;
@@ -257,7 +257,7 @@ contract ColdStaking {
 
     modifier staking_available
     {
-        require(now >= DateStartStaking);
+        require(block.number >= BlockStartStaking);
         _;
     }
 
@@ -271,7 +271,7 @@ contract ColdStaking {
         uint _amount = staker[_addr].amount;
         
         TotalStakingAmount = TotalStakingAmount.sub(_amount);
-        TotalStakingWeight = TotalStakingWeight.sub(((staker[_addr].end_time).sub(staker[_addr].time)).mul(_amount)); // remove from Weight.
+        TotalStakingWeight = TotalStakingWeight.sub((Timestamp.sub(staker[_addr].time)).mul(_amount)); // remove from Weight.
 
         staker[_addr].amount = 0;
         _addr.transfer(_amount);
